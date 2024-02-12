@@ -14,7 +14,7 @@ import { LocationService } from 'src/location/location.service';
 import { Location } from 'src/location/entities/location.entity';
 
 @Injectable()
-export class routeService {
+export class RouteService {
   speed = 60;
   constructor(
     @InjectRepository(Route)
@@ -106,8 +106,10 @@ export class routeService {
         let totalPrice = 0;
         let totalDistance = 0;
         let totalTime = 0;
+        //Backtrack
         while (current !== starterLocation.id) {
           const previous = parent[current];
+          //route[0] is the cheapest route (sorted by price in findByLocation method)
           const route = await this.findByLocation(previous, current);
           const distance = await this.distanceService.findByLocation(
             previous,
@@ -140,6 +142,7 @@ export class routeService {
         }
       }
     }
+    result.sort((a, b) => a.totalPrice - b.totalPrice);
     return result;
   }
 
