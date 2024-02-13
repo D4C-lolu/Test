@@ -19,10 +19,15 @@ export class LocationService {
     return await this.locationRepository.find();
   }
 
-  async findOne(id: string): Promise<Location> {
+  async findById(id: string): Promise<Location> {
     const location = await this.locationRepository.findOne({
       where: { id },
     });
+    return location;
+  }
+
+  async findOne(id: string): Promise<Location> {
+    const location = await this.findById(id);
     if (!location) {
       throw new NotFoundException(`No location found with that id`);
     }

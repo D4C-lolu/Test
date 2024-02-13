@@ -48,9 +48,6 @@ export class RouteService {
       relations: ['pickupLocation', 'dropoffLocation, rider'],
       order: { price: 'ASC' },
     });
-    if (!route) {
-      throw new NotFoundException(`No route found with those co-ordinates `);
-    }
     return route;
   }
 
@@ -77,11 +74,11 @@ export class RouteService {
     toLocation: string,
   ): Promise<DeliveryRoute[]> {
     const result: DeliveryRoute[] = [];
-    const starterLocation = await this.locationService.findOne(fromLocation);
-    const destinationLocation = await this.locationService.findOne(toLocation);
+    const starterLocation = await this.locationService.findById(fromLocation);
+    const destinationLocation = await this.locationService.findById(toLocation);
     const routes = await this.findByLocation(fromLocation, toLocation);
     routes.forEach(async (route) => {
-      const distance = await this.distanceService.findByLocation(
+      const distance = await this.distanceService.findDistance(
         route.pickupLocation.id,
         route.dropoffLocation.id,
       );
@@ -110,18 +107,18 @@ export class RouteService {
         while (current !== starterLocation.id) {
           const previous = parent[current];
           //route[0] is the cheapest route (sorted by price in findByLocation method)
-          const route = await this.findByLocation(previous, current);
+          const routes = await this.findByLocation(previous, current);
           const distance = await this.distanceService.findByLocation(
             previous,
             current,
           );
           routeLocations.push(
             ...(await this.locationRepository.findByIds([
-              route[0].pickupLocation.id,
-              route[0].dropoffLocation.id,
+              routes[0].pickupLocation.id,
+              routes[0].dropoffLocation.id,
             ])),
           );
-          totalPrice += route[0].price;
+          totalPrice += routes[0].price;
           totalDistance += distance.distance;
           totalTime += distance.distance / this.speed;
           current = previous;

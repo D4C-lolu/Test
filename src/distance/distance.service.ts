@@ -31,13 +31,18 @@ export class DistanceService {
   }
 
   async findByLocation(from: string, to: string): Promise<Distance> {
+    const distance = await this.findDistance(from, to);
+    if (!distance) {
+      throw new NotFoundException(`No distance found with those co-ordinates `);
+    }
+    return distance;
+  }
+
+  async findDistance(from: string, to: string): Promise<Distance> {
     const distance = await this.distanceRepository.findOne({
       where: { fromLocation: { id: from }, toLocation: { id: to } },
       relations: ['fromLocation', 'toLocation'],
     });
-    if (!distance) {
-      throw new NotFoundException(`No distance found with those co-ordinates `);
-    }
     return distance;
   }
 
